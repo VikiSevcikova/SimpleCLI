@@ -56,18 +56,20 @@ const STRING_DATA_COLLECTION_JP =
 	RecievedSignal: "受信信号"
 	}
 
+const STRING_DATA_COLLECTION_SK =
+	{
+	StartupMessage: "Spustenie aplikácie",
+	WaitMessage: "Prosím čakajte...",
+	RecievedSignal: "Prijaté"
+	}
 
 // As you can imagine, in a really big application, managing languages
 // like that would be a bad idea. We would load it from translation files. 
 // But the concept is the same. 
 
-
-
 // Here, I just define which one I want to be the default for me. I choose english
 // This way, the system always has a default language set
 const STRING_DATA_COLLECTION_DEFAULT = STRING_DATA_COLLECTION_EN
-
-
 
 // The collection our program will actually use, which is mostly undefined until we define it
 // I intend to have it overwritten a bit later in the application startup process
@@ -106,22 +108,13 @@ function getMsg(key)
 	return STRING_DATA_COLLECTION[key];
 	}
 
-
-
 // Lets display our startup message, but in our chosen language
 console.log(getMsg("StartupMessage"));
 console.log(getMsg("WaitMessage"));
 
-setLanguage(STRING_DATA_COLLECTION_FR);
-
-
-
-
 // Begin reading from stdin so the process does not exit.
 // This is a common trick to prevent our application terminating.
 process.stdin.resume();
-
-
 
 // Here, we attach to the SIGINT event, this is a low operating system
 // level event common on UNIX like platforms and emulated on others. 
@@ -135,7 +128,7 @@ process.on('SIGINT', () => {
 
 // Using a single function to handle multiple signals
 function handle(signal) {
-  console.log(getMsg("RecievedSignal") + ' ${signal}');
+  console.log(`${getMsg("RecievedSignal")} ${signal}`);
 }
 
 
@@ -148,8 +141,10 @@ process.on('SIGHUP', handle);
 // is 'resized' on most platforms (but not all)
 process.on('SIGWINCH', handle);
 
-
-
+process.stdout.on('resize', () => {
+	console.log('screen size has changed!');
+	console.log(`${process.stdout.columns}x${process.stdout.rows}`);
+});
 
 // I create an object called application, just to represent a simple application
 // I am implementing it here, but it will not execute until I have created an
@@ -160,9 +155,55 @@ class Application
 	// will always have an ExecutablePath, but may, or maynot have Command Line Arguments
 	constructor(ExecutablePath = undefined, CommandLineArguments = undefined)
 		{
-		console.log(CommandLineArguments);
+			console.log('Arguments:');
+			console.log(CommandLineArguments);
+			for(let i = 0; i < CommandLineArguments.length; i++){
+				switch(CommandLineArguments[i]){
+					case 'JP': 
+						setLanguage(STRING_DATA_COLLECTION_JP);
+						break;
+					case 'FR': 
+						setLanguage(STRING_DATA_COLLECTION_FR);
+						break;
+					case 'EN': 
+						setLanguage(STRING_DATA_COLLECTION_EN);
+						break;
+					case 'TK': 
+						setLanguage(STRING_DATA_COLLECTION_TK);
+						break;
+					case 'SK': 
+						setLanguage(STRING_DATA_COLLECTION_SK);
+						break;
+					case 'PT': 
+						setLanguage(STRING_DATA_COLLECTION_PT);
+						break;	
+					case 'SP': 
+						setLanguage(STRING_DATA_COLLECTION_SP);
+						break;
+					case 'showArch': 
+						console.log(`Architecture: ${process.arch}`);
+						break;
+					case 'showOs': 
+						console.log(`OS: ${process.platform}`);
+						break;
+					case 'changeFolder': 
+						console.log(`Change folder to ${CommandLineArguments[i+1]}`);
+						try {
+							process.chdir(CommandLineArguments[i+1]);
+							console.log(`New directory: ${process.cwd()}`);
+						  } catch (err) {
+							console.error(`chdir: ${err}`);
+						  }
+						i++;
+						break;
+					case 'screenSize': 
+						console.log(`Screen size: ${process.stdout.columns}x${process.stdout.rows}`);
+						break;
+					default:
+						console.log("Command not found");
+				}
+			}
 		}
-
 	}
 
 // The process.argv property returns an array containing the command-line arguments passed when the Node.js process was launched. 
@@ -171,7 +212,13 @@ class Application
 // node programs, such as, this program, calls that program. 
 // The second element will be the path to the JavaScript file being executed. 
 // The remaining elements will be any additional command-line arguments.
-for (let paramIndex = 0; paramIndex < process.argv.length; paramIndex++)
-	{
+let args = process.argv.slice(2, process.argv.length);
 
-	}
+let ourApplication = new Application(process.argv0, args);
+	//process.argv
+	// with "" you can make a log arg with space
+	// if(process.argv.length > 2){
+	// 	if(process.argv[2] === "--h"){
+	// 		console.log("helper");
+	// 	}
+	// }
