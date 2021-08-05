@@ -1,6 +1,7 @@
 //Here, we will import the process module, one of Node's core modules
 //We will use a number of functions within it as our application start's up
 const process = require('process');
+const os = require('os');
 
 
 
@@ -180,11 +181,16 @@ class Application
 					case 'SP': 
 						setLanguage(STRING_DATA_COLLECTION_SP);
 						break;
-					case 'showArch': 
+					case 'arch': 
 						console.log(`Architecture: ${process.arch}`);
 						break;
-					case 'showOs': 
+					case 'os': 
 						console.log(`OS: ${process.platform}`);
+						break;
+					case 'cpu': 
+						let cpus = os.cpus();
+						console.log(`Cpus: ${cpus.length} cores`);
+						cpus.map((cpu)=> console.log(cpu));
 						break;
 					case 'changeFolder': 
 						console.log(`Change folder to ${CommandLineArguments[i+1]}`);
